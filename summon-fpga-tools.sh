@@ -50,6 +50,8 @@ YOSYS_GIT=${YOSYS_GIT:-master}
 YOSYS_CONFIG=${YOSYS_CONFIG:-}
 IVERILOG_EN=${IVERILOG_EN:-1}
 IVERILOG_GIT=${IVERILOG_GIT:-v10-branch}
+GHDL_EN=${GHDL_EN:-1}
+GHDL_GIT=${GHDL_GIT:-master}
 
 # Override automatic detection of cpus to compile on
 CPUS=${CPUS:-}
@@ -334,9 +336,9 @@ if [ ${ICESTORM_EN} != 0 ]; then
 	if [ "x${ICESTORM_GIT}" == "x" ]; then
 		log "There is no icestorm stable release download server yet!"
 		exit 1
-		#fetch ${ICESTORM} https://github.com/cliffordwolf/icestorm/archive/${ICESTORM}.tar.bz2
+		#fetch ${ICESTORM} https://github.com/YosysHQ/icestorm/archive/${ICESTORM}.tar.bz2
 	else
-		clone icestorm ${ICESTORM_GIT} https://github.com/cliffordwolf/icestorm.git
+		clone icestorm ${ICESTORM_GIT} https://github.com/YosysHQ/icestorm.git
 	fi
 fi
 
@@ -344,7 +346,7 @@ if [ ${PRJTRELLIS_EN} != 0 ]; then
 	if [ "x${PRJTRELLIS_GIT}" == "x" ]; then
 		log "There is no prjtrellis stable release download server yet!"
 		exit 1
-		#fetch ${PRJTRELLIS} https://github.com/SymbiFlow/prjtrellis/archive/${PRJTRELLIS}.tar.bz2
+		#fetch ${PRJTRELLIS} https://github.com/YosysHQ/prjtrellis/archive/${PRJTRELLIS}.tar.bz2
 	else
 		clone prjtrellis ${PRJTRELLIS_GIT} https://github.com/YosysHQ/prjtrellis.git
 	fi
@@ -356,7 +358,7 @@ fi
 #		exit 1
 #		#fetch ${ARACHNEPNR} https://github.com/YosysHQ/arachne-pnr/archive/${ARACHNEPNR}.tar.bz2
 #	else
-#		clone arachnepnr ${ARACHNEPNR_GIT} git://github.com/YosysHQ/arachne-pnr.git
+#		clone arachnepnr ${ARACHNEPNR_GIT} https://github.com/YosysHQ/arachne-pnr.git
 #	fi
 #fi
 
@@ -383,6 +385,14 @@ if [ ${IVERILOG_EN} != 0 ]; then
 		fetch ${IVERILOG} https://github.com/steveicarus/iverilog/archive/${IVERILOG_VERSION}.tar.gz ${IVERILOG}.tar.gz
 	else
 		clone iverilog ${IVERILOG_GIT} https://github.com/steveicarus/iverilog.git
+	fi
+fi
+
+if [ ${GHDL_EN} != 0 ]; then
+	if [ "x${GHDL_GIT}" == "x" ]; then
+		fetch ${GHDL} https://github.com/ghdl/ghdl/archive/${GHDL_VERSION}.tar.gz ${GHDL}.tar.gz
+	else
+		clone ghdl ${GHDL_GIT} https://github.com/ghdl/ghdl.git
 	fi
 fi
 
@@ -494,4 +504,18 @@ if [ ${IVERILOG_EN} != 0 ] && [ ! -e ${STAMPS}/${IVERILOG}.build ]; then
     log "Cleaning up ${IVERILOG}"
     touch ${STAMPS}/${IVERILOG}.build
     rm -rf build/* ${IVERILOG}
+fi
+
+if [ ${GHDL_EN} != 0 ] && [ ! -e ${STAMPS}/${GHDL}.build ]; then
+    unpack ${GHDL}
+    cd build
+    log "Configuring ${GHDL}"
+    ../${GHDL}/configure --with-llvm-config --prefix=${PREFIX}
+    log "Building ${GHDL}"
+    make ${PARALLEL} ${MAKEFLAGS}
+    install ${GHDL} install
+    cd ..
+    log "Cleaning up ${GHDL}"
+    touch ${STAMPS}/${GHDL}.build
+    rm -rf build/* ${GHDL}
 fi
